@@ -152,8 +152,12 @@ void inputDefaultValues(Automato *AFN) {
     }
 }
 
+
+
 int main () {
     Automato AFN;
+    Automato AFD;
+
 
     inputDefaultValues(&AFN);
     getAutomato(&AFN);
