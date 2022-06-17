@@ -1,1 +1,3 @@
-gcc -o main.exe main.c
+Simulador de Automato finito nao deterministico.
+
+`gcc -o main.exe main.c`
