@@ -6,14 +6,9 @@
 
 //!---------------------------------------------
 
-    typedef struct TransicaoCompleta {
-        int idDestino;
-        int idOrigem;
-        char simbolo;
-    }TransicaoCompleta;
-
     typedef struct Transicao
     {
+        int idOrigem;
         int idDestino;
         char simbolo;
     } Transicao;
@@ -21,15 +16,16 @@
     typedef struct Estado {
         int id, numTransicoes;
         char name;
+        int idParaConvercao[2]; //
         bool ehAceite;
-        Transicao transcoes[10]; //contem somente transições que saem do estado
     }Estado;
 
     typedef struct Automato
     {
-        int idInicio;
-        int numEstados;
+        int idInicio, numEstados, numTransicoes;
+
         Estado estados[20];
+        Transicao Transicoes[20];
     }Automato;
 //!---------------------------------------------
 
@@ -78,16 +74,16 @@ void getEstadosFromFile( FILE *file, Automato *AFN){
     
 }
 
-void getTransicoesFromFile ( FILE *file, TransicaoCompleta arrTransicao[20], int *arrSize){
+void getTransicoesFromFile ( FILE *file, Automato *AFN){
     char buff[100];
 
     for(int i = 0; i <= 20; i++){
-        *arrSize = i;
+        AFN->numTransicoes = i;
         fgets(buff, 100, (FILE*)file); //skip <transitions>
 
-        fscanf(file, "\t\t\t<from>%d</from>\n", &arrTransicao[i].idOrigem );
-        fscanf(file, "\t\t\t<to>%d</to>\n", &arrTransicao[i].idDestino );
-        fscanf(file, "\t\t\t<read>%c</read>\n", &arrTransicao[i].simbolo );
+        fscanf(file, "\t\t\t<from>%d</from>\n", &AFN->Transicoes[i].idOrigem );
+        fscanf(file, "\t\t\t<to>%d</to>\n", &AFN->Transicoes[i].idDestino );
+        fscanf(file, "\t\t\t<read>%c</read>\n", &AFN->Transicoes[i].simbolo );
 
         fgets(buff, 100, (FILE*)file); //skip </transitions>
         fgets(buff, 100, (FILE*)file); 
@@ -106,23 +102,7 @@ int findEstadoIndexById(int id, Automato *AFN){
             return(i);
         }
     }
-    return 100000;
-}
-
-void insertTransicoesEstadosFromFile( FILE *file, Automato *AFN){
-    TransicaoCompleta arrTransicao[20];
-    int arrSize;
-    getTransicoesFromFile(file, arrTransicao, &arrSize);
-    
-    for(int i = 0; i <= arrSize; i++){
-        int estadoIndex = findEstadoIndexById(arrTransicao[i].idOrigem, AFN);
-        int *idxTransicao = &AFN->estados[estadoIndex].numTransicoes;
-
-        AFN->estados[estadoIndex].transcoes[*idxTransicao].simbolo = arrTransicao[i].simbolo;
-        AFN->estados[estadoIndex].transcoes[*idxTransicao].idDestino = arrTransicao[i].idDestino;        
-        AFN->estados[estadoIndex].numTransicoes = *idxTransicao + 1;
-    }
-
+    return 1000;
 }
 
 void getAutomato(Automato *AFN) {
@@ -134,21 +114,22 @@ void getAutomato(Automato *AFN) {
 
     skipXmlHeader(file);
     getEstadosFromFile(file, AFN);
-    insertTransicoesEstadosFromFile(file, AFN);
-
-    // printf("%d", AFN->estados[0].id);
-
-    
+    getTransicoesFromFile(file, AFN);
 
     fclose(file);
 }
 
-void inputDefaultValues(Automato *AFN) {
+void inputDefaultValues(Automato *A) {
     for(int i = 0; i <= 20; i++){
-        AFN->estados[i].ehAceite = false;
-        AFN->estados[i].id = 0;
-        AFN->estados[i].name = 'w';
-        AFN->estados[i].numTransicoes = 0;
+        A->estados[i].ehAceite = false;
+        A->estados[i].id = 0;
+        A->estados[i].name = 'w';
+        A->estados[i].numTransicoes = 0;
+    }
+    for(int i = 0; i <= 20; i++){
+        A->Transicoes[i].idDestino = 0;
+        A->Transicoes[i].idOrigem = 0;
+        A->Transicoes[i].simbolo = 0;
     }
 }
 
@@ -160,6 +141,8 @@ int main () {
 
 
     inputDefaultValues(&AFN);
+    inputDefaultValues(&AFD);
+
     getAutomato(&AFN);
     //converter afd
     //gerar xml convertido
