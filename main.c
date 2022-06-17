@@ -123,10 +123,6 @@ void insertTransicoesEstadosFromFile( FILE *file, Automato *AFN){
         AFN->estados[estadoIndex].numTransicoes = *idxTransicao + 1;
     }
 
-    // printf("%d - ", AFN->estados[1].transcoes[0].idDestino);
-    // printf("%d - ", AFN->estados[1].transcoes[1].idDestino);
-    // printf("%d - ", AFN->estados[1].transcoes[2].idDestino);
-
 }
 
 void getAutomato(Automato *AFN) {
@@ -161,6 +157,8 @@ int main () {
 
     inputDefaultValues(&AFN);
     getAutomato(&AFN);
+    //converter afd
+    //gerar xml convertido
 
     printf("\n");
     return 0;
