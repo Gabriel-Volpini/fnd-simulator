@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 //Autor  - Gabriel Nagem Volpini
 
@@ -366,6 +367,37 @@ void gerarXml(Automato *a){
 
 
 }
+
+int findTransacaoIndexPorIdOrigem(Automato *a, int idOrigem, char simbolo){
+
+    for(int i= 0; i <= a->numTransicoes; i++){
+        Transicao currentTransicao = a->Transicoes[i];
+        if(currentTransicao.idOrigem == idOrigem && currentTransicao.simbolo == simbolo){
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+bool frasePertenceAutomato(Automato *a, char frase[20]){
+    int idCurrentState = a->idInicio;
+
+    // imprimeAutomato(a);
+
+    for(int i = 0; i <= strlen(frase)-1; i++){
+    int indexTransacao = findTransacaoIndexPorIdOrigem(a, idCurrentState, frase[i]);
+        if(indexTransacao == -1){
+            return false;
+        }
+        idCurrentState = a->Transicoes[indexTransacao].idDestino;
+    }
+
+    int indexLastEstado = findEstadoIndexById(idCurrentState, a);
+
+    return a->estados[indexLastEstado].ehAceite;
+}
+
 int main () {
     Automato AFN;
     Automato AFD;
@@ -377,10 +409,39 @@ int main () {
 
     converterAutomato(&AFN, &AFD);
     gerarXml(&AFD);
-    //  imprimeAutomato(convertidoAFD);
 
-    //simular entrada pelo usuario
+    char imprimir;
+    printf("digite s para imprimir os automatos: ");
+    scanf("%c",&imprimir);
+    if(imprimir == 's'){
+        printf("AFN:\n");
+        imprimeAutomato(&AFN);
+        printf("AFD:\n");
+        imprimeAutomato(&AFD);
+    }
 
+
+    printf("\n\nAutomato convertido e salvo no arquivo AFD.xml\n");
+    char continuar = 's';
+
+    while (continuar == 's')
+    {
+        printf("Insira uma frase usando 0 ou 1 para simular: ");
+
+        char frase[20];
+        scanf("%s", frase);
+        if( frasePertenceAutomato(&AFD, frase) ==true ){
+            printf("A frase %s PERTENCE a linguagem\n", frase);
+        } else {
+            printf("A frase %s NAO PERTENCE linguagem\n", frase);
+        }
+
+        printf("digite 's' para testar uma nova frase: ");
+        scanf("%1s", &continuar);
+    }
+    
+    
     printf("\n");
+    exit(EXIT_SUCCESS);    
     return 0;
 }
